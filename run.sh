@@ -11,7 +11,7 @@ PROJECT="${PROJECT:=$(gcloud config get project)}"
 CONDA_ENV_YAML="${CONDA_ENV_YAML:=environment.yml}"
 
 # Neo4j config
-#NEO4J_URL="${NEO4J_URL:=}"
+NEO4J_URL="${NEO4J_URL:=}"
 NEO4J_USER="${NEO4J_USER:=neo4j}"
 NEO4J_PASS="${NEO4J_PASS:=password}"
 DATABASE="${DATABASE:=neo4j}"
@@ -20,12 +20,12 @@ usage () {
     echo "usage: run.sh [pyspark-job-file]" >&2
     echo "" >&2
     echo "required environment config (cause I'm lazy!):" >&2
-    echo "    STAGING: GCS location for staging job artifacts" >&2
-    #    echo "  NEO4J_URL: Neo4j bolt url (e.g. neo4j://hostname:7687)" >&2
-    echo "optional:" >&2
-    echo "    CLUSTER: Dataproc cluster to run the job (default: ${CLUSTER})" >&2
+    echo "      STAGING: GCS location for staging job artifacts" >&2
+    echo "    NEO4J_URL: Neo4j bolt url (e.g. neo4j://hostname:7687)" >&2
+    echo "optional environment config:" >&2
+    echo "           CLUSTER: Dataproc cluster to run the job (default: ${CLUSTER})" >&2
     echo "    CONDA_ENV_YAML: file for bootstrapping Dataproc's conda env" >&2
-    echo "    REGION: GCP region for the cluster (default: ${REGION})" >&2
+    echo "            REGION: GCP region for the cluster (default: ${REGION})" >&2
     exit 1
 }
 
@@ -65,6 +65,7 @@ JOBFILE="${1:=}"
 
 # Inspect required toggles
 if [ ! -f "${JOBFILE}" ]; then usage; fi
+if [ -z "${NEO4J_URL}" ]; then fail "no NEO4J_URl set!"; fi
 if [ -z "${STAGING}" ]; then fail "no STAGING set, please specify a GCS uri!"; fi
 
 # Check for or create Dataproc Cluster
@@ -82,4 +83,5 @@ gcloud dataproc jobs submit pyspark \
        --region "${REGION}" \
        --cluster "${CLUSTER}" \
        --jars "${SPARK_BQ_URI}" \
-       "${STAGING}/${JOBFILE}"
+       "${STAGING}/${JOBFILE}" -- \
+       "${NEO4J_URL}" "${NEO4J_USER}" "${NEO4J_PASS}"

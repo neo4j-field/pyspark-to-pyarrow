@@ -1,8 +1,22 @@
+import os
+import sys
+
 import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import pandas_udf
 
 import pyarrow as pa
+from graphdatascience import GraphDataScience
+
+if len(sys.argv) < 4:
+    print("uhhh see usage?")
+    os.exit(1)
+
+_, NEO4J_URL, NEO4J_USER, NEO4J_PASS = sys.argv[:4]
+gds = GraphDataScience(NEO4J_URL, auth=(NEO4J_USER, NEO4J_PASS))
+
+# validate connection
+print(gds.run_cypher("RETURN 1;"))
 
 spark = (
     SparkSession.builder
