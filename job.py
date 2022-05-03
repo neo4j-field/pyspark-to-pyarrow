@@ -42,7 +42,7 @@ def load_rows_as_tables(arrow_host: str, arrow_port: int, desc: dict):
 def guid_to_int(*fields):
     """Convert fields in a given row from a str-based guid to an int value"""
     def _guid_to_int(row: Row) -> Row:
-        # this is a total hack...mask off the upper 64 bits :(
+        # this is a total hack...mask off the upper 65 bits :(
         result = {}
         for field in row.asDict():
             if field in fields:
@@ -76,7 +76,7 @@ nodes = (
     spark.read
     .format("bigquery")
     .load("neo4j-se-team-201905.fraud_demo_data.user")
-    #.repartition(1)
+    .repartition(8)
     .withColumnRenamed("guid", "node_id")
     .cache()
 )
@@ -84,7 +84,7 @@ edges =  (
     spark.read
     .format("bigquery")
     .load("neo4j-se-team-201905.fraud_demo_data.p2p")
-    #.repartition(1)
+    .repartition(8)
     .withColumnRenamed("start_guid", "source_id")
     .withColumnRenamed("end_guid", "destination_id")
     .drop("start_label", "end_label", "transactionDateTime", "totalAmount")
