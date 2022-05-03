@@ -78,7 +78,7 @@ fi
 # gsutil rsync -x "venv" "$(pwd)" "${STAGING}/"
 gsutil cp "${JOBFILE}" "${STAGING}/"
 
-PY_FILES="$(ls ./*.py | sed 's/.*/"&",/' | tr -d '\n' | sed 's/"job\.py"//' | sed 's/,,//')"
+PY_FILES="$(ls *.py | sed 's/.*/&,/' | tr -d '\n' | sed 's/,,//')"
 if [ ! -z "${PY_FILES}" ]; then echo "...including Python files ${PY_FILES}"; fi
 
 # Submit DataProc job!
